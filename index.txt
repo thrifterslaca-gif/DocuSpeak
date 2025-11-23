@@ -20,7 +20,10 @@
 <body>
     <header>
         <div class="logo">DocuSpeak</div>
-        <a href="mailto:hello@docuspeak.com" class="btn" style="font-size: 14px; padding: 10px 20px;">Contact Us</a>
+        <div style="display: flex; gap: 20px; align-items: center;">
+            <a href="potential_clients.html" style="color: #0f2c45; text-decoration: none; font-weight: bold;">Potential Clients</a>
+            <a href="mailto:hello@docuspeak.com" class="btn" style="font-size: 14px; padding: 10px 20px;">Contact Us</a>
+        </div>
     </header>
     <section class="hero">
         <h1>Legal Translations. Certified.</h1>
