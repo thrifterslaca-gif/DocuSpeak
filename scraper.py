@@ -2,7 +2,7 @@ import os
 import csv
 import re
 from datetime import date
-from imap_tools import MailBox, AND
+from O365 import Account
 import gspread
 from google.oauth2.service_account import Credentials
 import pandas as pd
@@ -12,12 +12,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Configuration
-EMAIL_USER = os.getenv('OUTLOOK_EMAIL')
-EMAIL_PASS = os.getenv('OUTLOOK_PASSWORD') # App Password recommended
+AZURE_CLIENT_ID = os.getenv('AZURE_CLIENT_ID')
 SPREADSHEET_ID = os.getenv('SPREADSHEET_ID')
 GOOGLE_CREDS_FILE = os.getenv('GOOGLE_CREDS_FILE', 'credentials.json')
 CSV_FILENAME = 'leads.csv'
-IMAP_SERVER = 'outlook.office365.com'
 
 # List of common public email domains to exclude
 PUBLIC_DOMAINS = {
@@ -38,53 +36,78 @@ def get_company_name(email_address):
     domain = email_address.split('@')[1]
     # Remove TLD (e.g., .com, .co.uk)
     parts = domain.split('.')
-    if len(parts) > 2:
-        # heuristic for things like .co.uk or subdomains
-        # simply taking the first part as a guess, but often the second to last is better if it's not a generic co.uk
-        # For simplicity, taking the part before the first dot, or if it's very short, maybe looking deeper.
-        # But commonly: mail.google.com -> mail? no.
-        # company.co.uk -> company
-        company = parts[0]
-    else:
-        company = parts[0]
+    # Simple heuristic: take the first part.
+    # e.g. company.com -> company
+    # company.co.uk -> company
+    company = parts[0]
     return company.capitalize()
 
 def connect_and_scrape():
-    print("Connecting to Outlook...")
+    print("Connecting to Outlook via Microsoft Graph...")
 
-    if not EMAIL_USER or not EMAIL_PASS:
-        print("Error: OUTLOOK_EMAIL and OUTLOOK_PASSWORD environment variables must be set.")
+    if not AZURE_CLIENT_ID:
+        print("Error: AZURE_CLIENT_ID environment variable must be set.")
+        print("Please see README.md for instructions on creating an Azure App.")
         return []
 
     leads = []
 
     try:
-        with MailBox(IMAP_SERVER).login(EMAIL_USER, EMAIL_PASS) as mailbox:
-            # Fetch emails. You can adjust criteria (e.g., specific folder, date)
-            # Fetching all emails might be slow. Limiting to last 500 for demonstration.
-            print("Fetching emails...")
-            for msg in mailbox.fetch(limit=500, reverse=True):
-                email_address = msg.from_
-                name = msg.from_values.name
+        # Authenticate with Device Code Flow or Interactive
+        # For a local script without a secret, we act as a Public Client.
+        credentials = (AZURE_CLIENT_ID, )
+        account = Account(credentials)
 
-                # Clean up name if empty
-                if not name:
-                    name = email_address.split('@')[0]
+        if not account.is_authenticated:
+            print("Authentication required.")
+            # 'basic' scope is usually enough for profile, 'message_all' for reading mail
+            if account.authenticate(scopes=['basic', 'message_all']):
+                print('Authenticated!')
+            else:
+                print("Authentication failed.")
+                return []
 
-                if is_business_email(email_address):
-                    company = get_company_name(email_address)
+        mailbox = account.mailbox()
+        inbox = mailbox.get_folder(folder_name='Inbox')
 
-                    lead = {
-                        'Company': company,
-                        'Name': name,
-                        'Email': email_address,
-                        'Date Found': date.today().isoformat()
-                    }
+        print("Fetching emails...")
+        # Retrieve last 500 messages
+        # O365 library returns a generator or iterable
+        query = inbox.new_query().order_by('receivedDateTime', ascending=False)
 
-                    # Avoid duplicates in the current run list
-                    if not any(l['Email'] == email_address for l in leads):
-                        leads.append(lead)
-                        print(f"Found lead: {name} at {company}")
+        count = 0
+        for msg in inbox.get_messages(limit=500, query=query, download_attachments=False):
+            sender = msg.sender
+            # sender is an object with name and address
+            name = sender.name
+            email_address = sender.address
+
+            if not email_address:
+                continue
+
+            # Clean up name if empty
+            if not name:
+                name = email_address.split('@')[0]
+
+            if is_business_email(email_address):
+                company = get_company_name(email_address)
+
+                lead = {
+                    'Company': company,
+                    'Name': name,
+                    'Email': email_address,
+                    'Date Found': date.today().isoformat()
+                }
+
+                # Avoid duplicates in the current run list
+                if not any(l['Email'] == email_address for l in leads):
+                    leads.append(lead)
+                    print(f"Found lead: {name} at {company}")
+
+            count += 1
+            if count % 50 == 0:
+                print(f"Processed {count} emails...")
+
     except Exception as e:
         print(f"Error connecting to email: {e}")
         return []
@@ -97,21 +120,12 @@ def save_to_csv(leads):
         print("No leads to save to CSV.")
         return
 
-    # To avoid duplicates in CSV over time, one would ideally read the existing CSV.
-    # But CSV is often just a dump. We will just overwrite or append?
-    # Let's overwrite 'leads.csv' with the current run's finding, or maybe append?
-    # User might prefer a fresh list or an accumulated one.
-    # Let's assume this script is run to get a fresh batch or we can try to append if file exists.
-
     mode = 'w'
     header = True
     if os.path.exists(CSV_FILENAME):
         mode = 'a'
         header = False
 
-    # However, if we append, we might duplicate.
-    # For a simple script, let's just write the current batch to a new file or overwrite.
-    # The user can manage the CSV.
     df = pd.DataFrame(leads)
     df.to_csv(CSV_FILENAME, index=False, mode=mode, header=header)
     print(f"Leads saved to {CSV_FILENAME}")
@@ -144,8 +158,8 @@ def save_to_google_sheets(leads):
         existing_emails = set()
 
         if existing_data:
-            # Assuming 'Email' is the 3rd column (index 2) based on the order: Company, Name, Email, Date Found
-            # Find the header index for 'Email' to be safe
+            # Assuming 'Email' is the 3rd column (index 2)
+            # Try to find header
             headers = existing_data[0]
             try:
                 email_idx = headers.index('Email')
@@ -153,10 +167,8 @@ def save_to_google_sheets(leads):
                     if len(row) > email_idx:
                         existing_emails.add(row[email_idx])
             except ValueError:
-                # Header not found, maybe empty or different structure
                 pass
         else:
-             # If empty, add headers
             headers = list(leads[0].keys())
             sheet.append_row(headers)
 

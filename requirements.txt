@@ -1,4 +1,4 @@
-imap-tools
+O365
 gspread
 google-auth
 pandas
