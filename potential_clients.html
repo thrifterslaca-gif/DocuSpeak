@@ -3,90 +3,147 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DocuSpeak | Potential Clients</title>
+    <title>DocuSpeak | CRM Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { font-family: sans-serif; margin: 0; padding: 0; color: #333; background-color: #f4f6f8; }
-        header { background: #fff; padding: 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; }
-        .logo { font-weight: bold; font-size: 24px; color: #0f2c45; text-decoration: none; }
-        .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
-        h1 { font-size: 36px; color: #0f2c45; margin-bottom: 10px; }
-        .header-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        .btn { background: #2ba868; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; cursor: pointer; border: none; font-size: 16px; }
-        .btn:hover { background: #248f58; }
-
-        /* Grid Layout */
-        .client-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
+        /* Custom scrollbar for a more polished feel */
+        ::-webkit-scrollbar {
+            width: 8px;
         }
-        .card {
-            background: white;
-            padding: 25px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            transition: transform 0.2s;
-            display: flex;
-            flex-direction: column;
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
         }
-        .card:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-        .card h3 { margin-top: 0; color: #0f2c45; margin-bottom: 5px; }
-        .card .industry { color: #2ba868; font-weight: bold; font-size: 14px; margin-bottom: 15px; text-transform: uppercase; }
-        .card p { font-size: 14px; line-height: 1.5; color: #555; margin-bottom: 10px; flex-grow: 1; }
-        .card .meta { font-size: 13px; color: #888; margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px; }
-
-        footer { background: #0f2c45; color: #889eb3; padding: 40px; text-align: center; margin-top: 60px; }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
     </style>
 </head>
-<body>
-    <header>
-        <a href="index.txt" class="logo">DocuSpeak</a>
-        <a href="mailto:hello@docuspeak.com" class="btn" style="font-size: 14px; padding: 10px 20px; background-color: #0f2c45;">Contact Us</a>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased">
+
+    <!-- Top Navigation / Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-10 border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-8">
+                <a href="index.txt" class="text-2xl font-bold text-slate-800 tracking-tight">DocuSpeak <span class="text-blue-600 font-normal">CRM</span></a>
+                <nav class="hidden md:flex gap-6 text-sm font-medium text-slate-500">
+                    <a href="#" class="text-blue-600 hover:text-blue-700 transition">Leads</a>
+                    <a href="#" class="hover:text-slate-800 transition">Pipeline</a>
+                    <a href="#" class="hover:text-slate-800 transition">Reports</a>
+                </nav>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="relative">
+                    <input type="text" id="searchInput" placeholder="Search leads by name or city..."
+                        class="pl-10 pr-4 py-2 bg-slate-100 border-none rounded-full text-sm focus:ring-2 focus:ring-blue-500 focus:bg-white transition w-64 shadow-inner"
+                        oninput="filterClients()">
+                    <svg class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </div>
+                <button onclick="exportToCSV()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 shadow-lg shadow-blue-600/20">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    Export CSV
+                </button>
+            </div>
+        </div>
     </header>
 
-    <div class="container">
-        <div class="header-actions">
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <div class="flex justify-between items-end mb-6">
             <div>
-                <h1>Potential Clients</h1>
-                <p>Leads in Medical Research & Clinical Trials</p>
+                <h1 class="text-2xl font-bold text-slate-900">Potential Clients</h1>
+                <p class="text-slate-500 text-sm mt-1">Medical Research & Clinical Trial Leads</p>
             </div>
-            <button class="btn" onclick="exportToCSV()">Export to CSV</button>
+            <div class="text-sm text-slate-500">
+                Showing <span id="count" class="font-bold text-slate-900">0</span> leads
+            </div>
         </div>
 
-        <div id="client-list" class="client-grid">
-            <!-- Client cards will be injected here -->
+        <!-- Grid Layout -->
+        <div id="client-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- Cards will be injected here -->
         </div>
-    </div>
 
-    <footer>
-        <p>&copy; 2025 DocuSpeak Legal Translations.</p>
+    </main>
+
+    <footer class="bg-white border-t border-slate-200 mt-12 py-8">
+        <div class="max-w-7xl mx-auto px-4 text-center text-slate-400 text-sm">
+            &copy; 2025 DocuSpeak Legal Translations. All rights reserved.
+        </div>
     </footer>
 
     <!-- Load the data -->
     <script src="clients.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const grid = document.getElementById('client-list');
-
-            if (typeof clients !== 'undefined' && Array.isArray(clients)) {
-                clients.forEach(client => {
-                    const card = document.createElement('div');
-                    card.className = 'card';
-                    card.innerHTML = `
-                        <h3>${client.company}</h3>
-                        <div class="industry">${client.industry}</div>
-                        <p><strong>Needs:</strong> ${client.needs}</p>
-                        <div class="meta">
-                            📍 ${client.location}<br>
-                            ✉️ <a href="mailto:${client.contact}" style="color:#2ba868; text-decoration:none;">${client.contact}</a>
-                        </div>
-                    `;
-                    grid.appendChild(card);
-                });
-            } else {
-                grid.innerHTML = '<p>No client data found. Run the scraper to generate leads.</p>';
-            }
+            renderClients(clients);
         });
+
+        function renderClients(data) {
+            const grid = document.getElementById('client-list');
+            const countLabel = document.getElementById('count');
+            grid.innerHTML = '';
+            countLabel.textContent = data.length;
+
+            if (data.length === 0) {
+                grid.innerHTML = '<div class="col-span-full text-center py-12 text-slate-400">No leads found matching your search.</div>';
+                return;
+            }
+
+            data.forEach(client => {
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition-all duration-200 flex flex-col p-5 group';
+
+                // Get initials for avatar
+                const initials = client.company.substring(0, 2).toUpperCase();
+
+                card.innerHTML = `
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-sm font-bold border border-blue-100">
+                                ${initials}
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-slate-900 text-base leading-tight group-hover:text-blue-600 transition">${client.company}</h3>
+                                <p class="text-xs text-slate-500 font-medium uppercase tracking-wide mt-0.5">${client.industry}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex-grow space-y-3 mb-6">
+                        <div class="flex items-center gap-2 text-sm text-slate-600">
+                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                            <span class="truncate">${client.location}</span>
+                        </div>
+                        <div class="bg-slate-50 rounded-lg p-3 text-xs text-slate-600 leading-relaxed border border-slate-100">
+                            <span class="font-semibold text-slate-700 block mb-1">Translation Needs:</span>
+                            ${client.needs}
+                        </div>
+                    </div>
+
+                    <a href="mailto:${client.contact}" class="mt-auto w-full block text-center bg-white border border-slate-200 text-slate-700 font-semibold py-2 rounded-lg text-sm hover:bg-slate-50 hover:text-blue-600 hover:border-blue-200 transition">
+                        Contact Lead
+                    </a>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function filterClients() {
+            const input = document.getElementById('searchInput').value.toLowerCase();
+
+            if (typeof clients !== 'undefined') {
+                const filtered = clients.filter(client => {
+                    return client.company.toLowerCase().includes(input) ||
+                           client.location.toLowerCase().includes(input);
+                });
+                renderClients(filtered);
+            }
+        }
 
         function exportToCSV() {
             if (typeof clients === 'undefined' || !clients.length) {
@@ -94,10 +151,7 @@
                 return;
             }
 
-            // Define CSV headers
             const headers = ["Company", "Industry", "Location", "Needs", "Contact"];
-
-            // Map data to CSV format
             const csvRows = [headers.join(",")];
 
             clients.forEach(client => {
@@ -111,13 +165,12 @@
                 csvRows.push(row.join(","));
             });
 
-            // Create blob and download
             const csvString = csvRows.join("\n");
             const blob = new Blob([csvString], { type: "text/csv" });
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;
-            a.download = "potential_clients.csv";
+            a.download = "docuspeak_leads.csv";
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
