@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DocuSpeak | Certified Legal Translations</title>
+    <style>
+        body { font-family: sans-serif; margin: 0; padding: 0; color: #333; }
+        header { background: #fff; padding: 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; }
+        .logo { font-weight: bold; font-size: 24px; color: #0f2c45; }
+        .hero { background: linear-gradient(135deg, #0f2c45 0%, #1a4a70 100%); color: white; padding: 100px 20px; text-align: center; }
+        h1 { font-size: 48px; margin-bottom: 20px; }
+        p { font-size: 20px; max-width: 600px; margin: 0 auto 40px; }
+        .btn { background: #2ba868; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 18px; }
+        .features { padding: 80px 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; background: #f9f9f9; }
+        .card { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        footer { background: #0f2c45; color: #889eb3; padding: 40px; text-align: center; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">DocuSpeak</div>
+        <a href="mailto:hello@docuspeak.com" class="btn" style="font-size: 14px; padding: 10px 20px;">Contact Us</a>
+    </header>
+    <section class="hero">
+        <h1>Legal Translations. Certified.</h1>
+        <p>Accurate, secure, and fast translations for immigration and corporate law firms.</p>
+        <a href="mailto:hello@docuspeak.com" class="btn">Get a Free Quote</a>
+    </section>
+    <section class="features">
+        <div class="card"><h3>⚖️ Court Certified</h3><p>USCIS compliant translations accepted by government agencies worldwide.</p></div>
+        <div class="card"><h3>🔒 Secure</h3><p>Strict confidentiality protocols to protect sensitive client data.</p></div>
+        <div class="card"><h3>⚡ Fast</h3><p>Same-day turnaround available for urgent legal filings.</p></div>
+    </section>
+    <footer>
+        <p>&copy; 2025 DocuSpeak Legal Translations.</p>
+    </footer>
+</body>
+</html>
