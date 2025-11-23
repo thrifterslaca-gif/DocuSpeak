@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Potential Clients | DocuSpeak</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <header class="bg-white shadow-sm">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="text-2xl font-bold text-gray-800"><a href="/">DocuSpeak</a></div>
+            <a href="mailto:hello@docuspeak.com" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">Contact Us</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-8">
+        <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">Potential Clients</h1>
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
+                <button id="exportCsvBtn" class="inline-flex items-center justify-center gap-2 rounded-full bg-blue-500 px-5 py-2 text-sm font-semibold text-white shadow hover:bg-blue-600 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500">
+                    <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 8v8l4-4m6 4H5m14-4a8 8 0 10-16 0 8 8 0 0016 0z" />
+                    </svg>
+                    Export to CSV
+                </button>
+                <div class="relative w-full sm:w-72">
+                    <input type="text" id="searchInput" onkeyup="filterClients()" placeholder="Search by name, city, or focus..." class="bg-white h-11 w-full rounded-full border border-gray-300 px-5 pr-12 text-sm shadow-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200">
+                    <svg class="pointer-events-none absolute top-0 right-0 mt-3.5 mr-4 h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <div id="client-grid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
+            <!-- Client cards will be dynamically inserted here -->
+        </div>
+    </main>
+
+    <footer class="bg-gray-800 text-white py-6 mt-8">
+        <div class="container mx-auto px-6 text-center">
+            <p>&copy; 2025 DocuSpeak Legal Translations.</p>
+        </div>
+    </footer>
+
+    <script>
+        const clients = [
+            { name: "Wachtell, Lipton, Rosen & Katz", city: "New York, NY", segment: "Legal services", focus: "Cross-border transactions needing certified filings", contactEmail: "info@wlrk.com" },
+            { name: "Cravath, Swaine & Moore LLP", city: "New York, NY", segment: "Legal services", focus: "Global M&A disclosures and compliance translations", contactEmail: "contact@cravath.com" },
+            { name: "Davis Polk & Wardwell LLP", city: "New York, NY", segment: "Legal services", focus: "Capital markets documentation localization", contactEmail: "translation@davispolk.com" },
+            { name: "Skadden, Arps, Slate, Meagher & Flom LLP", city: "New York, NY", segment: "Legal services", focus: "Regulatory filings in multilingual jurisdictions", contactEmail: "intlfilings@skadden.com" },
+            { name: "Latham & Watkins LLP", city: "Los Angeles, CA", segment: "Legal services", focus: "Global antitrust case documentation", contactEmail: "globalservices@lw.com" },
+            { name: "Kirkland & Ellis LLP", city: "Chicago, IL", segment: "Legal services", focus: "International arbitration briefs", contactEmail: "intl@kirkland.com" },
+            { name: "Gibson, Dunn & Crutcher LLP", city: "Los Angeles, CA", segment: "Legal services", focus: "Cross-border litigation discovery", contactEmail: "solutions@gibsondunn.com" },
+            { name: "Sullivan & Cromwell LLP", city: "New York, NY", segment: "Legal services", focus: "Financial regulatory submissions", contactEmail: "support@sullcrom.com" },
+            { name: "Quinn Emanuel Urquhart & Sullivan, LLP", city: "Los Angeles, CA", segment: "Legal services", focus: "International dispute resolution materials", contactEmail: "intlteam@quinnemanuel.com" },
+            { name: "Simpson Thacher & Bartlett LLP", city: "New York, NY", segment: "Legal services", focus: "Prospectus and fund reporting translations", contactEmail: "solutions@stblaw.com" },
+            { name: "Sidley Austin LLP", city: "Chicago, IL", segment: "Legal services", focus: "Compliance documentation for multinational clients", contactEmail: "clientservices@sidley.com" },
+            { name: "Jones Day", city: "Washington, DC", segment: "Legal services", focus: "Government contract documentation translations", contactEmail: "global@jonesday.com" },
+            { name: "Mayo Clinic Center for Clinical Trials", city: "Rochester, MN", segment: "Medical research", focus: "Phase II oncology protocols for multilingual patient populations", contactEmail: "clinicaltrials@mayo.edu" },
+            { name: "MD Anderson Cancer Center Clinical Research", city: "Houston, TX", segment: "Medical research", focus: "Immunotherapy trial documentation and consent forms", contactEmail: "research@mdanderson.org" },
+            { name: "Cleveland Clinic Clinical Research Unit", city: "Cleveland, OH", segment: "Medical research", focus: "Cardiovascular device trial reporting", contactEmail: "researchservices@ccf.org" },
+            { name: "Johns Hopkins Center for Clinical Global Research", city: "Baltimore, MD", segment: "Medical research", focus: "Global infectious disease study materials", contactEmail: "globaltrials@jhmi.edu" },
+            { name: "Massachusetts General Hospital Translational Research Center", city: "Boston, MA", segment: "Medical research", focus: "Neurology trial protocols for international sites", contactEmail: "research@mgh.harvard.edu" },
+            { name: "Stanford Clinical Translational Research Unit", city: "Stanford, CA", segment: "Medical research", focus: "Precision medicine consent forms in multiple languages", contactEmail: "ctru@stanford.edu" },
+            { name: "UCSF Clinical Trials Operations", city: "San Francisco, CA", segment: "Medical research", focus: "Rare disease study outreach materials", contactEmail: "clinicaltrials@ucsf.edu" },
+            { name: "Northwestern University Feinberg Clinical Research Office", city: "Chicago, IL", segment: "Medical research", focus: "Neurodegenerative trial participant communications", contactEmail: "researchoffice@northwestern.edu" },
+            { name: "University of Pennsylvania Clinical Trials Unit", city: "Philadelphia, PA", segment: "Medical research", focus: "Gene therapy trial documentation", contactEmail: "ctu@pennmedicine.upenn.edu" },
+            { name: "Duke Clinical Research Institute", city: "Durham, NC", segment: "Medical research", focus: "Global cardiovascular outcomes studies", contactEmail: "solutions@dcri.org" },
+            { name: "Emory University Winship Cancer Institute Trials Office", city: "Atlanta, GA", segment: "Medical research", focus: "Oncology patient-reported outcomes translation", contactEmail: "winshiptrials@emory.edu" },
+            { name: "University of Michigan Rogel Cancer Clinical Trials Office", city: "Ann Arbor, MI", segment: "Medical research", focus: "Immuno-oncology trial instructions", contactEmail: "rogeltrials@umich.edu" },
+            { name: "Children's Hospital of Philadelphia Research Institute", city: "Philadelphia, PA", segment: "Medical research", focus: "Pediatric rare disease consent and assent forms", contactEmail: "research@chop.edu" },
+            { name: "Fred Hutchinson Cancer Center Clinical Trials Office", city: "Seattle, WA", segment: "Medical research", focus: "Cell therapy protocol translation", contactEmail: "clinicaltrials@fredhutch.org" },
+            { name: "Dana-Farber Cancer Institute Clinical Trials Office", city: "Boston, MA", segment: "Medical research", focus: "Leukemia study documentation for global sites", contactEmail: "clinicaltrials@dfci.harvard.edu" },
+            { name: "Rush University Medical Center Clinical Trials Office", city: "Chicago, IL", segment: "Medical research", focus: "Neurology rehabilitation trial materials", contactEmail: "clinicalresearch@rush.edu" },
+            { name: "City of Hope Clinical Research Unit", city: "Duarte, CA", segment: "Medical research", focus: "CAR-T therapy patient education", contactEmail: "research@coh.org" },
+            { name: "Mount Sinai Clinical Trials Office", city: "New York, NY", segment: "Medical research", focus: "Cardiometabolic study documentation", contactEmail: "clinicaltrials@mountsinai.org" },
+            { name: "NYU Langone Clinical Research Center", city: "New York, NY", segment: "Medical research", focus: "Neuroscience trial recruitment materials", contactEmail: "researchservices@nyulangone.org" },
+            { name: "Baylor Scott & White Research Institute", city: "Dallas, TX", segment: "Medical research", focus: "Diabetes and metabolic disorder trial translations", contactEmail: "research@bswhealth.org" }
+        ];
+
+        const clientGrid = document.getElementById('client-grid');
+        const searchInput = document.getElementById('searchInput');
+        let currentClients = [...clients];
+
+        function renderClients(list) {
+            clientGrid.innerHTML = '';
+            currentClients = list;
+
+            if (!list.length) {
+                const emptyState = document.createElement('div');
+                emptyState.className = 'col-span-full rounded-lg border border-dashed border-gray-300 bg-white p-8 text-center text-gray-500';
+                emptyState.textContent = 'No leads matched the current filters. Try adjusting your search terms.';
+                clientGrid.appendChild(emptyState);
+                return;
+            }
+
+            list.forEach(client => {
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-2xl shadow-md ring-1 ring-gray-100 transition hover:-translate-y-1 hover:shadow-lg';
+                card.innerHTML = `
+                    <div class="flex flex-col gap-4 p-6">
+                        <div class="flex items-start justify-between gap-3">
+                            <h3 class="text-lg font-semibold text-gray-900 leading-tight">${client.name}</h3>
+                            <span class="whitespace-nowrap rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">${client.segment}</span>
+                        </div>
+                        <div class="space-y-2 text-sm text-gray-600">
+                            <p class="flex items-center gap-2">
+                                <svg class="h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 10.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5.25 9.75a6.75 6.75 0 1113.5 0c0 4.5-6.75 9-6.75 9s-6.75-4.5-6.75-9z" />
+                                </svg>
+                                ${client.city}
+                            </p>
+                            <p class="flex items-start gap-2 leading-snug">
+                                <svg class="mt-0.5 h-4 w-4 flex-none text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v14.248a.75.75 0 01-1.145.632L12 13.5l-7.855 5.38A.75.75 0 013 18.248V4z" />
+                                </svg>
+                                ${client.focus}
+                            </p>
+                        </div>
+                        <a href="mailto:${client.contactEmail}" class="inline-flex items-center justify-center gap-2 rounded-full bg-green-500 px-4 py-2 text-sm font-semibold text-white hover:bg-green-600 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-500">
+                            <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M4 6h16a1 1 0 011 1v10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a1 1 0 011-1z" />
+                            </svg>
+                            Contact Lead
+                        </a>
+                    </div>
+                `;
+                clientGrid.appendChild(card);
+            });
+        }
+
+        function filterClients() {
+            const searchTerm = searchInput.value.trim().toLowerCase();
+
+            if (!searchTerm) {
+                renderClients(clients);
+                return;
+            }
+
+            const filtered = clients.filter(client =>
+                client.name.toLowerCase().includes(searchTerm) ||
+                client.city.toLowerCase().includes(searchTerm) ||
+                client.segment.toLowerCase().includes(searchTerm) ||
+                client.focus.toLowerCase().includes(searchTerm)
+            );
+            renderClients(filtered);
+        }
+
+        function exportToCSV() {
+            const headers = ["Name", "City", "Segment", "Focus", "Contact Email"];
+            const rows = currentClients.map(client => [
+                client.name,
+                client.city,
+                client.segment,
+                client.focus,
+                client.contactEmail
+            ]);
+
+            const csvContent = [headers, ...rows]
+                .map(row => row
+                    .map(value => `"${String(value ?? '').replace(/"/g, '""')}"`)
+                    .join(',')
+                )
+                .join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `docuspeak-potential-clients-${new Date().toISOString().slice(0, 10)}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        // Initial render
+        renderClients(clients);
+        document.getElementById('exportCsvBtn').addEventListener('click', exportToCSV);
+    </script>
+
+</body>
+</html>
