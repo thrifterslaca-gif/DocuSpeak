@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DocuSpeak | Potential Clients</title>
+    <style>
+        body { font-family: sans-serif; margin: 0; padding: 0; color: #333; background-color: #f4f6f8; }
+        header { background: #fff; padding: 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; }
+        .logo { font-weight: bold; font-size: 24px; color: #0f2c45; text-decoration: none; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+        h1 { font-size: 36px; color: #0f2c45; margin-bottom: 10px; }
+        .header-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .btn { background: #2ba868; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; cursor: pointer; border: none; font-size: 16px; }
+        .btn:hover { background: #248f58; }
+
+        /* Grid Layout */
+        .client-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+            display: flex;
+            flex-direction: column;
+        }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .card h3 { margin-top: 0; color: #0f2c45; margin-bottom: 5px; }
+        .card .industry { color: #2ba868; font-weight: bold; font-size: 14px; margin-bottom: 15px; text-transform: uppercase; }
+        .card p { font-size: 14px; line-height: 1.5; color: #555; margin-bottom: 10px; flex-grow: 1; }
+        .card .meta { font-size: 13px; color: #888; margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px; }
+
+        footer { background: #0f2c45; color: #889eb3; padding: 40px; text-align: center; margin-top: 60px; }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="index.txt" class="logo">DocuSpeak</a>
+        <a href="mailto:hello@docuspeak.com" class="btn" style="font-size: 14px; padding: 10px 20px; background-color: #0f2c45;">Contact Us</a>
+    </header>
+
+    <div class="container">
+        <div class="header-actions">
+            <div>
+                <h1>Potential Clients</h1>
+                <p>Leads in Medical Research & Clinical Trials</p>
+            </div>
+            <button class="btn" onclick="exportToCSV()">Export to CSV</button>
+        </div>
+
+        <div id="client-list" class="client-grid">
+            <!-- Client cards will be injected here -->
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 DocuSpeak Legal Translations.</p>
+    </footer>
+
+    <!-- Load the data -->
+    <script src="clients.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const grid = document.getElementById('client-list');
+
+            if (typeof clients !== 'undefined' && Array.isArray(clients)) {
+                clients.forEach(client => {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.innerHTML = `
+                        <h3>${client.company}</h3>
+                        <div class="industry">${client.industry}</div>
+                        <p><strong>Needs:</strong> ${client.needs}</p>
+                        <div class="meta">
+                            📍 ${client.location}<br>
+                            ✉️ <a href="mailto:${client.contact}" style="color:#2ba868; text-decoration:none;">${client.contact}</a>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+            } else {
+                grid.innerHTML = '<p>No client data found. Run the scraper to generate leads.</p>';
+            }
+        });
+
+        function exportToCSV() {
+            if (typeof clients === 'undefined' || !clients.length) {
+                alert("No data to export!");
+                return;
+            }
+
+            // Define CSV headers
+            const headers = ["Company", "Industry", "Location", "Needs", "Contact"];
+
+            // Map data to CSV format
+            const csvRows = [headers.join(",")];
+
+            clients.forEach(client => {
+                const row = [
+                    `"${client.company}"`,
+                    `"${client.industry}"`,
+                    `"${client.location}"`,
+                    `"${client.needs}"`,
+                    `"${client.contact}"`
+                ];
+                csvRows.push(row.join(","));
+            });
+
+            // Create blob and download
+            const csvString = csvRows.join("\n");
+            const blob = new Blob([csvString], { type: "text/csv" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "potential_clients.csv";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+    </script>
+</body>
+</html>
