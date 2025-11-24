@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+.env
+*.csv
+credentials.json
+o365_token.txt
